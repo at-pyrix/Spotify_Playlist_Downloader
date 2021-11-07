@@ -1,6 +1,7 @@
 # Importing libraries
 import requests
 import subprocess
+import playsound
 from Refresh_Token import Refresh
 from simplejson.errors import JSONDecodeError
 from pytube import *
@@ -31,7 +32,6 @@ def animate(message):
         sleep(0.06)
 
 def play():
-    import playsound
     playsound.playsound(
         'C:\\Python\\Python_Projects\\song-downloader\\notification.wav')
 
