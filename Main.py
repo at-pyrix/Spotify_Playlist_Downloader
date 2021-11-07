@@ -30,7 +30,6 @@ def animate(message):
         stdout.flush()
         sleep(0.06)
 
-
 def play():
     import playsound
     playsound.playsound(
