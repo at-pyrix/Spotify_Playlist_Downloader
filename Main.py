@@ -27,7 +27,18 @@ def animate(message):
         stdout.flush()
         sleep(0.06)
 
+def play():
+    import playsound
+    playsound.playsound(
+        'C:\\Python\\Python_Projects\\song-downloader\\notification.wav')
 
+def notify(downloaded_file_name):
+    from win10toast import ToastNotifier
+    notify = ToastNotifier()
+    message = f"Your Playlist {downloaded_file_name} has been downloaded,"
+
+    notify.show_toast(title="Download Complete ✔️", msg=message,
+                        icon_path="E:\\ico\\spotify.ico", duration=4, threaded=True)
 
 def urlFinder(search_keyword):
     # Replace the empty spaces to %20 for the youtube URL
@@ -122,28 +133,42 @@ for i in items:
 print(f"{fc.YELLOW}Total Songs - {len(songs)}{fc.RESET}\n")
 
 playlist_Name = input(
-    f"Enter the name of the Playlist: {fc.CYAN}\n>>{fc.GREEN} ")
+    f"Enter the name of the Playlist: {fc.CYAN}\n>>{fc.GREEN} ").replace(",","").strip()
 print("\n")
 
 
 yt_links = []
 
-Thread(target=animate, args=('Downloading Playlist ',)).start()
+
 start = time()
 
 # Downloads all the songs from the playlist
 for i in songs:
+    done = False
+    arguments = []
+    arguments.append(f'Downloading {fc.YELLOW}{i["name"]}')
+    t = Thread(target=animate, args=arguments)
+    t.start()
     if "Various Artists" not in i['artist']:
-        search_query = F"{i['name']}{i['artist']}"
+        search_query = F"{i['name']}{i['artist']} song"
     else:
         search_query = i['name'] + " song"
     # Get's the url for the song
     song_url = urlFinder(search_query)
-    download(song_url)
+    try:
+        download(song_url)
+    except Exception:
+        done = True
+        print(f'\r{fc.RED}❌  Failed to Download: \u001B[33m{i["name"]} \n')
+    else:
+        done = True
+        print(f'\r{fc.GREEN}✔️  Downloaded: \u001B[33m{i["name"]}\n') 
+    t.join()
 
-done = True
-print(
-    f'\r{fc.GREEN}✔️  All Songs Downloaded in \u001B[33m{str (round(time() - start, 2))}s')
+
+
+notify(playlist_Name)
+play()
 
 print(fc.LIGHTBLACK_EX +
       f"\n\nThe files Downloaded are in a video format. Would you like to convert them to Mp3? [Y\\n]")
@@ -160,7 +185,7 @@ if "y" in convert_to_mp3.lower():
     print(fc.GREEN+'\rSuccessfully Converted'+fc.RESET)
 else:
     pass
-
+input()
 # spotify:playlist:49H2za6xCqCiITkfVHcAnk
 
 # spotify:playlist:5mc4thG3yqdzuJErdmjUL8
