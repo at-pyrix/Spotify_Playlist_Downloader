@@ -7,7 +7,7 @@ class Refresh:
         self.refresh_token = os.environ['SPOTIFY_REFRESH_TOKEN']
         #? Encode to Base64 - "{YOUR_CLIENT_IF}:{YOUR_CLIENT_SECRET}"
         #? Encode it from: https://www.base64encode.org/
-        self.client = "MDg2YmNiNDIyNDhlNGUyNDgwMDFjYjdjOWU0MmI4OTc6OGRlMjQ1OGVmNDQzNGNiNTkzMTAxNTVlNjJmMzY0OGI="
+        self.client = "base64(client_id:client_secret)"
 
     def refresh(self):
 
