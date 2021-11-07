@@ -21,4 +21,4 @@
 - Give a name to the Playlist.
 - It will Start Downloading.
 >(Recommended): 
- It will also ask whether to convert the audio to mp3 or not, Type Y for yes or N for no.
+ It will also ask whether to convert the audio to mp3 or not, Type Y for yes
