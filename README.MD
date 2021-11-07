@@ -15,7 +15,7 @@
 # How to run:
 
 - Run the `Main.py` file.
-- Copy the Spotify Playlist URI
+- Copy the Spotify Playlist URI/URL or Embed Code
 ![](images/image1.png)
 - Paste it.
 - Give a name to the Playlist.
