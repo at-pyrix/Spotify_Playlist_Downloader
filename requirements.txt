@@ -1,0 +1,5 @@
+colorama==0.4.4
+pytube==11.0.1
+pytube3==9.6.4
+requests==2.25.0
+simplejson==3.17.5
