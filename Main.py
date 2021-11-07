@@ -1,20 +1,23 @@
 # Importing libraries
 import requests
+import subprocess
 from Refresh_Token import Refresh
 from simplejson.errors import JSONDecodeError
 from pytube import *
 import urllib
 from colorama import Fore as fc
 import os
+from win10toast import ToastNotifier
 import re
 from threading import Thread
 from itertools import cycle
 from time import time, sleep
 from sys import stdout
 
-
+notify = ToastNotifier()
 error = False
 done = False
+
 
 def animate(message):
     for c in cycle([f'⡿ {message}', f'⣟ {message}', f'⣯ {message}', f'⣷ {message}', f'⣾ {message}', f'⣽ {message}', f'⣻ {message}', f'⢿ {message}']):
@@ -27,6 +30,28 @@ def animate(message):
         stdout.flush()
         sleep(0.06)
 
+
+def play():
+    import playsound
+    playsound.playsound(
+        'C:\\Python\\Python_Projects\\song-downloader\\notification.wav')
+
+
+def notifypls(downloaded_file_name):
+    message = f"Your Playlist {downloaded_file_name} has been downloaded."
+
+    notify.show_toast(title="Download Complete ✔️", msg=message,
+                      icon_path="E:\\ico\\spotify.ico", duration=4, threaded=True)
+
+
+def remove_emojis(text: str) -> str:
+    emoji_pattern = re.compile("["
+                               u"\U0001F600-\U0001F64F"
+                               u"\U0001F300-\U0001F5FF"
+                               u"\U0001F680-\U0001F6FF"
+                               u"\U0001F1E0-\U0001F1FF"
+                               "]+", flags=re.UNICODE)
+    return (emoji_pattern.sub(r'', text))
 
 
 def urlFinder(search_keyword):
@@ -51,11 +76,19 @@ def urlFinder(search_keyword):
 
 
 playlist_uri = input(
-    f"\nEnter your Spotify Playlist URI: \n{fc.CYAN}>>{fc.GREEN} ")
+    f"\nEnter your Spotify Playlist URL/Embed Code/URI: \n{fc.CYAN}>>{fc.GREEN} ")
+# Removes the url part, so we are only left with the Playlist ID
+if "iframe src" in playlist_uri:
+    playlist_id = playlist_uri.split(
+        'https://open.spotify.com/embed/playlist/')[1].split('" width')[0]
+elif "https://open.spotify.com/playlist/" in playlist_uri:
+    playlist_id = playlist_uri.split(
+        'https://open.spotify.com/playlist/')[1].split('?')[0]
+else:
+    playlist_id = playlist_uri.replace("spotify:playlist:", "").strip()
+
 print("\u001B[0m")
 
-# Removes the "spotify:playlist" part from the URI so we are only left with the Playlist ID
-playlist_id = playlist_uri.replace("spotify:playlist:", "").strip()
 
 url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
 
@@ -104,8 +137,10 @@ songs = []
 
 downloaded_files = []
 
-# Downloads the videos from youtube 
+# Downloads the videos from youtube
 # Saves the path it into a list
+
+
 def download(url):
     yt = YouTube(urlFinder(url))
     ys = yt.streams.filter(only_audio=True)
@@ -123,27 +158,43 @@ print(f"{fc.YELLOW}Total Songs - {len(songs)}{fc.RESET}\n")
 
 playlist_Name = input(
     f"Enter the name of the Playlist: {fc.CYAN}\n>>{fc.GREEN} ")
+playlist_Name.replace(",", "").strip()
 print("\n")
 
 
 yt_links = []
 
-Thread(target=animate, args=('Downloading Playlist ',)).start()
+
 start = time()
 
 # Downloads all the songs from the playlist
 for i in songs:
+    done = False
+    arguments = []
+    arguments.append(f'Downloading: {fc.YELLOW}{i["name"]}')
+    t = Thread(target=animate, args=arguments)
+    t.start()
     if "Various Artists" not in i['artist']:
-        search_query = F"{i['name']}{i['artist']}"
+        search_query = F"{i['name']}{i['artist']} song"
+        search_query = remove_emojis(search_query)
     else:
         search_query = i['name'] + " song"
+        search_query = remove_emojis(search_query)
     # Get's the url for the song
     song_url = urlFinder(search_query)
-    download(song_url)
+    try:
+        download(song_url)
+    except Exception:
+        done = True
+        print(f'\r{fc.RED}❌  Failed to Download: \u001B[33m{i["name"]} \n')
+    else:
+        done = True
+        print(f'\r{fc.GREEN}✔️  Downloaded: \u001B[33m{i["name"]}\n')
+    t.join()
 
-done = True
-print(
-    f'\r{fc.GREEN}✔️  All Songs Downloaded in \u001B[33m{str (round(time() - start, 2))}s')
+
+notifypls(playlist_Name)
+play()
 
 print(fc.LIGHTBLACK_EX +
       f"\n\nThe files Downloaded are in a video format. Would you like to convert them to Mp3? [Y\\n]")
@@ -153,15 +204,41 @@ print(fc.RESET)
 # Converts into mp3
 if "y" in convert_to_mp3.lower():
     parent_dir = playlist_Name
-    Thread(target=animate, args=("Converting To Mp3",)).start()
-    os.system(
-        f'py Video2Mp3.py "{downloaded_files}" "{parent_dir}"')
+    done = False
+    tt = Thread(target=animate, args=("Converting To Mp3",))
+    tt.start()
+    # Converting into mp3
+    for file in downloaded_files:
+        file = remove_emojis(file)
+        new_filename = os.path.splitext(file)[0]+".mp3"
+        new_filename = remove_emojis(new_filename)
+        already_exists = False
+
+        for i in os.listdir(parent_dir):
+            i = os.path.join(os.getcwd(), parent_dir, i)
+            i = remove_emojis(i)
+            if new_filename == i:
+                already_exists = True
+                break
+
+        if already_exists:
+            os.remove(file.strip())
+            continue
+        else:
+            try:
+                subprocess.getoutput(
+                    f'ffmpeg -i "{remove_emojis((os.path.join(file)).strip())}" "{remove_emojis(os.path.join(new_filename)).strip()}" '
+                )
+                os.remove(file.strip())
+            except:
+                pass
+
     done = True
-    print(fc.GREEN+'\rSuccessfully Converted'+fc.RESET)
+    tt.join()
+    print(fc.GREEN+'\r✔️  Successfully Converted'+fc.RESET)
+    notify.show_toast(title="Coversion Complete ✔️", msg="Successfully Converted the Playlist to Mp3",
+                      icon_path="E:\\ico\\spotify.ico", duration=4, threaded=True)
+    play()
 else:
     pass
-
-# spotify:playlist:49H2za6xCqCiITkfVHcAnk
-
-# spotify:playlist:5mc4thG3yqdzuJErdmjUL8
-# this is *our*
+sleep(3)
