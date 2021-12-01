@@ -181,15 +181,15 @@ def listen_to_keyboard():
 
 timeOver = False
 for i in range(1, 4):
+    if view == "Advanced":
+        print(f"\r{fc.CYAN}>> {fc.LIGHTGREEN_EX}Advanced View {fc.RESET}"+" "*60, end="\r")
+        break
     eventListener = Thread(target=listen_to_keyboard).start()
-    print(f"{fc.LIGHTCYAN_EX}Download Starting in {counter-1} {fc.LIGHTBLACK_EX}Press Pause Break to show advanced view{fc.RESET}", end="\r")
+    print(f"{fc.LIGHTCYAN_EX}Download Starting in {counter-1} {fc.LIGHTBLACK_EX}Press Pause Break to show Advanced view{fc.RESET}", end="\r")
     counter -= 1
     sleep(1)
 timeOver = True
-
-if view == "Advanced":
-    print(f"\r{fc.CYAN}>> {fc.LIGHTGREEN_EX}Advanced View {fc.RESET}"+" "*60, end="\r")
-else:
+if view == "Basic":
     print(" "*90, end="\r")
 sleep(0.7)
 print("                                                        ", end="\r")
@@ -210,7 +210,7 @@ for i in songs:
         arguments.append(f'Downloading: {fc.RESET}{i["name"]}')
     else:
         arguments.append(
-            f"{fc.CYAN}Downloaded {songCounter-1} of {len(songs)}{fc.RESET}")
+            f"{fc.CYAN}Downloaded {songCounter-1} of {len(songs)}{fc.RESET} songs")
 
     t = Thread(target=animate, args=arguments)
     t.start()
