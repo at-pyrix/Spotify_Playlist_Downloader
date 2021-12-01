@@ -41,7 +41,7 @@ def play():
 def notifypls():
     message = f"Your Playlist {playlist_Name} has been downloaded.\nSaved in \'{os.path.join('Music',playlist_Name)}\'"
 
-    notify.show_toast(title="Download Complete ✔️", msg=message,
+    notify.show_toast(title="Download Complete ✅", msg=message,
                       icon_path="images/spotify.ico", duration=4, threaded=True)
 
 
@@ -161,10 +161,8 @@ print("\n")
 
 yt_links = []
 
-
 start = time()
 
-# Downloads all the songs from the playlist
 counter = 4
 
 view = "Basic"
@@ -184,15 +182,16 @@ for i in range(1, 4):
     if view == "Advanced":
         print(f"\r{fc.CYAN}>> {fc.LIGHTGREEN_EX}Advanced View {fc.RESET}"+" "*60, end="\r")
         break
+    
     eventListener = Thread(target=listen_to_keyboard).start()
     print(f"{fc.LIGHTCYAN_EX}Download Starting in {counter-1} {fc.LIGHTBLACK_EX}Press Pause Break to show Advanced view{fc.RESET}", end="\r")
     counter -= 1
     sleep(1)
+    
 timeOver = True
-if view == "Basic":
-    print(" "*90, end="\r")
+
+print(" "*90, end="\r")
 sleep(0.7)
-print("                                                        ", end="\r")
 
 songCounter = 1
 
@@ -210,7 +209,7 @@ for i in songs:
         arguments.append(f'Downloading: {fc.RESET}{i["name"]}')
     else:
         arguments.append(
-            f"{fc.CYAN}Downloaded {songCounter-1} of {len(songs)}{fc.RESET} songs")
+            f"{fc.CYAN}Downloaded {songCounter-1} of {len(songs)} songs{fc.RESET}")
 
     t = Thread(target=animate, args=arguments)
     t.start()
@@ -233,9 +232,9 @@ for i in songs:
     done = True
     t.join()
     songCounter += 1
-print(f'\r{fc.CYAN}[✓]{fc.GREEN} Downloaded Complete {fc.RESET}\n')
+print(f'\r{fc.CYAN}[✓]{fc.GREEN} Downloaded Complete in {fc.YELLOW}{round(time()-start)}s{fc.RESET}\n')
 
-
+start = time()
 notifypls()
 play()
 
@@ -278,8 +277,8 @@ if convert_to_mp3.lower() == "y" or convert_to_mp3.lower() == "yes":
 
     done = True
     tt.join()
-    print(fc.CYAN+'\r[✓] '+fc.GREEN+'Successfully Converted'+fc.RESET)
+    print(f'{fc.CYAN}\r[✓] {fc.GREEN}Successfully Converted in {fc.YELLOW}{round(time()-start)}s{fc.RESET}')
     notify.show_toast(title="Coversion Complete ✅", msg="Successfully Converted the Playlist to Mp3",
                       icon_path="images/spotify.ico", duration=4, threaded=True)
     play()
-sleep(2)
+    sleep(2)
