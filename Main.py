@@ -173,6 +173,7 @@ view = "Basic"
 def listen_to_keyboard():
     while not timeOver:
         if keyboard.is_pressed('pause'):
+            global view
             view = "Advanced"
             break
         pass
