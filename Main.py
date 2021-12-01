@@ -282,3 +282,4 @@ if convert_to_mp3.lower() == "y" or convert_to_mp3.lower() == "yes":
                       icon_path="images/spotify.ico", duration=4, threaded=True)
     play()
     sleep(2)
+os.startfile('Music')
