@@ -1,5 +1,6 @@
 # Importing libraries
 import requests
+import keyboard
 import subprocess
 from Refresh_Token import Refresh
 from simplejson.errors import JSONDecodeError
@@ -30,17 +31,17 @@ def animate(message):
         stdout.flush()
         sleep(0.06)
 
+
 def play():
     import playsound
-    playsound.playsound(
-        'C:\\Python\\Python_Projects\\song-downloader\\notification.wav')
+    playsound.playsound('Sound/notification.wav')
 
 
-def notifypls(downloaded_file_name):
-    message = f"Your Playlist {downloaded_file_name} has been downloaded."
+def notifypls():
+    message = f"Your Playlist {playlist_Name} has been downloaded.\nSaved in \'{os.path.join('Music',playlist_Name)}\'"
 
     notify.show_toast(title="Download Complete ✔️", msg=message,
-                      icon_path="E:\\ico\\spotify.ico", duration=4, threaded=True)
+                      icon_path="images/spotify.ico", duration=4, threaded=True)
 
 
 def remove_emojis(text: str) -> str:
@@ -86,21 +87,18 @@ elif "https://open.spotify.com/playlist/" in playlist_uri:
 else:
     playlist_id = playlist_uri.replace("spotify:playlist:", "").strip()
 
-print("\u001B[0m")
+print(fc.RESET)
 
 
 url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
 
-# * Your OAuth Token
-# ? Get it from https://developer.spotify.com/console/get-playlist/?playlist_id=&market=&fields=&additional_types=
-# ? Click GET TOKEN > Request Token
+
 # Generates a new access token from Refresh Token
 # See: https://developer.spotify.com/documentation/general/guides/authorization/, https://developer.spotify.com/documentation/web-api/quick-start/
 token = Refresh().refresh()
 
 
-# Passing the headers to the url which translates to:
-# `curl -X "GET" "https://api.spotify.com/v1/playlists/" -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer {access_token}`
+# Passing the headers to the url
 
 headers = {
     'Accept': 'application/json',
@@ -121,7 +119,7 @@ except JSONDecodeError:
 # Prints the error if it get's an error
 try:
     print(
-        f"\r\u001B[31mError {data['error']['status']}: {data['error']['message']}\u001B[0m")
+        f"\r{fc.LIGHTRED_EX}mError {data['error']['status']}: {data['error']['message']}{fc.RESET}")
 
 except KeyError:
     pass
@@ -139,11 +137,10 @@ downloaded_files = []
 # Downloads the videos from youtube
 # Saves the path it into a list
 
-
 def download(url):
     yt = YouTube(urlFinder(url))
     ys = yt.streams.filter(only_audio=True)
-    file = ys[-1].download(output_path=playlist_Name)
+    file = ys[-1].download(output_path=os.path.join('Music',playlist_Name))
     downloaded_files.append(file)
 
 
@@ -157,7 +154,7 @@ print(f"{fc.YELLOW}Total Songs - {len(songs)}{fc.RESET}\n")
 
 playlist_Name = input(
     f"Enter the name of the Playlist: {fc.CYAN}\n>>{fc.GREEN} ")
-playlist_Name.replace(",", "").strip()
+playlist_Name.replace(" ", "_").encode("ascii", "ignore").decode().strip()
 print("\n")
 
 
@@ -167,42 +164,87 @@ yt_links = []
 start = time()
 
 # Downloads all the songs from the playlist
+counter = 4
+
+view = "Basic"
+
+
+def listen_to_keyboard():
+    while not timeOver:
+        if keyboard.is_pressed('pause'):
+            view = "Advanced"
+            break
+        pass
+
+
+timeOver = False
+for i in range(1, 4):
+    eventListener = Thread(target=listen_to_keyboard).start()
+    print(f"{fc.LIGHTCYAN_EX}Download Starting in {counter-1} {fc.LIGHTBLACK_EX}Press Pause Break to show advanced view{fc.RESET}", end="\r")
+    counter -= 1
+    sleep(1)
+timeOver = True
+
+if view == "Advanced":
+    print(f"\r{fc.CYAN}>> {fc.LIGHTGREEN_EX}Advanced View {fc.RESET}"+" "*60, end="\r")
+else:
+    print(" "*90, end="\r")
+sleep(0.7)
+print("                                                        ", end="\r")
+
+songCounter = 1
+
 for i in songs:
     done = False
-    arguments = []
-    arguments.append(f'Downloading: {fc.YELLOW}{i["name"]}')
-    t = Thread(target=animate, args=arguments)
-    t.start()
     if "Various Artists" not in i['artist']:
         search_query = F"{i['name']}{i['artist']} song"
         search_query = remove_emojis(search_query)
     else:
         search_query = i['name'] + " song"
         search_query = remove_emojis(search_query)
-    # Get's the url for the song
-    song_url = urlFinder(search_query)
+
+    arguments = []
+    if view == "Advanced":
+        arguments.append(f'Downloading: {fc.RESET}{i["name"]}')
+    else:
+        arguments.append(
+            f"{fc.CYAN}Downloaded {songCounter-1} of {len(songs)}{fc.RESET}")
+
+    t = Thread(target=animate, args=arguments)
+    t.start()
+    song_url = urlFinder(search_query.encode("ascii", "ignore").decode())
     try:
         download(song_url)
     except Exception:
         done = True
-        print(f'\r{fc.RED}❌  Failed to Download: \u001B[33m{i["name"]} \n')
+        if view == "Advanced":
+            print(
+                f'\r{fc.RED}❌  Failed to Download: {fc.RESET}{i["name"]} by {i["artist"]} \n')
+        else:
+            songCounter += 1
     else:
         done = True
-        print(f'\r{fc.GREEN}✔️  Downloaded: \u001B[33m{i["name"]}\n')
+        if view == "Advanced":
+            print(
+                f'\r{fc.CYAN}[✓]{fc.GREEN} Downloaded: {fc.RESET}{i["name"]} by {i["artist"]}\n')
+
+    done = True
     t.join()
+    songCounter += 1
+print(f'\r{fc.CYAN}[✓]{fc.GREEN} Downloaded Complete {fc.RESET}\n')
 
 
-notifypls(playlist_Name)
+notifypls()
 play()
 
 print(fc.LIGHTBLACK_EX +
-      f"\n\nThe files Downloaded are in a video format. Would you like to convert them to Mp3? [Y\\n]")
+      f"\n\nThe files Downloaded are in a video format. Would you like to convert them to Mp3? [Y/n]")
 convert_to_mp3 = input(fc.CYAN + "\n>> " + fc.GREEN)
 print(fc.RESET)
 
 # Converts into mp3
-if "y" in convert_to_mp3.lower():
-    parent_dir = playlist_Name
+if convert_to_mp3.lower() == "y" or convert_to_mp3.lower() == "yes":
+    parent_dir = os.path.join('Music',playlist_Name)
     done = False
     tt = Thread(target=animate, args=("Converting To Mp3",))
     tt.start()
@@ -234,10 +276,8 @@ if "y" in convert_to_mp3.lower():
 
     done = True
     tt.join()
-    print(fc.GREEN+'\r✔️  Successfully Converted'+fc.RESET)
-    notify.show_toast(title="Coversion Complete ✔️", msg="Successfully Converted the Playlist to Mp3",
-                      icon_path="E:\\ico\\spotify.ico", duration=4, threaded=True)
+    print(fc.CYAN+'\r[✓] '+fc.GREEN+'Successfully Converted'+fc.RESET)
+    notify.show_toast(title="Coversion Complete ✅", msg="Successfully Converted the Playlist to Mp3",
+                      icon_path="images/spotify.ico", duration=4, threaded=True)
     play()
-else:
-    pass
-sleep(3)
+sleep(2)

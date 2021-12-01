@@ -5,7 +5,7 @@ class Refresh:
     def __init__(self):
         # Your Spotify Refresh Token Here
         self.refresh_token = os.environ['SPOTIFY_REFRESH_TOKEN']
-        #? Encode to Base64 - "{YOUR_CLIENT_IF}:{YOUR_CLIENT_SECRET}"
+        #? Encode to Base64 - "{YOUR_CLIENT_ID}:{YOUR_CLIENT_SECRET}"
         #? Encode it from: https://www.base64encode.org/
         self.client = os.environ['SPOTIFY_CLIENT']
 
