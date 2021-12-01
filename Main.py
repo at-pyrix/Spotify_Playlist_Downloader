@@ -20,6 +20,10 @@ notify = ToastNotifier()
 error = False
 done = False
 
+earlierPath = os.getcwd()
+
+# Directory where you saved the script
+os.chdir("C:\Programming\Python_Projects\Spotify_Playlist_Downloader")
 
 def animate(message):
     for c in cycle([f'⡿ {message}', f'⣟ {message}', f'⣯ {message}', f'⣷ {message}', f'⣾ {message}', f'⣽ {message}', f'⣻ {message}', f'⢿ {message}']):
@@ -282,4 +286,5 @@ if convert_to_mp3.lower() == "y" or convert_to_mp3.lower() == "yes":
                       icon_path="images/spotify.ico", duration=4, threaded=True)
     play()
     sleep(2)
-os.startfile(f'Music/{playlist_Name}')
+os.startfile(os.path.join(os.getcwd(), 'Music', playlist_Name))
+os.chdir(earlierPath)
