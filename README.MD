@@ -15,10 +15,10 @@
 # How to run:
 
 - Run the `Main.py` file.
-- Copy the Spotify Playlist URI
+- Copy the Spotify Playlist URI/URL or Embed Code
 ![](images/image1.png)
 - Paste it.
 - Give a name to the Playlist.
 - It will Start Downloading.
 >(Recommended): 
- It will also ask whether to convert the audio to mp3 or not, Type Y for yes or N for no.
+ It will also ask whether to convert the audio to mp3 or not, Type Y for yes
