@@ -8,7 +8,7 @@
   ```
     pip install -r requirements.txt
   ```
-- Get your Spotify Client ID and Client Secret, save it as an environment variable: `SPOTIFY_CLIENT_ID` `SPOTIFY_CLIENT_SECRET` respectively.
+- Get your Spotify Client ID and Client Secret, save it as environment variables: `SPOTIFY_CLIENT_ID` `SPOTIFY_CLIENT_SECRET`.
 
 - Follow the code comments to get an Idea.
 
