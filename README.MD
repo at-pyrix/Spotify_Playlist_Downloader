@@ -22,3 +22,7 @@
 - It will Start Downloading.
 >(Recommended): 
  It will also ask whether to convert the audio to mp3 or not, Type Y for yes
+
+---
+Read my blog: https://notyasho.netlify.app/blogs
+[Contact](https://notyasho.netlify.app/contact)
